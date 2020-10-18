@@ -14,6 +14,14 @@ namespace SWE1_MTCG
             }
         }
 
+        public List<ICard> CardsInDeck
+        {
+            get => default;
+            set
+            {
+            }
+        }
+
         public void ChooseCards()
         {
             throw new System.NotImplementedException();

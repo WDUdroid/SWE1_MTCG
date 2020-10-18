@@ -1,28 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
-  <Class Name="SWE1_MTCG.MonsterCard">
-    <Position X="21" Y="13.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAACAAAAAAAAAAAgAEAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>MonsterCard.cs</FileName>
-    </TypeIdentifier>
-    <ShowAsAssociation>
-      <Property Name="Element" />
-      <Property Name="MonsterType" />
-    </ShowAsAssociation>
-    <Lollipop Position="0.2" />
-  </Class>
-  <Class Name="SWE1_MTCG.SpellCard">
-    <Position X="26.5" Y="13.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAACAAAAAAAAAAAgAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>SpellCard.cs</FileName>
-    </TypeIdentifier>
-    <ShowAsAssociation>
-      <Property Name="Element" />
-    </ShowAsAssociation>
-    <Lollipop Position="0.2" />
-  </Class>
   <Class Name="SWE1_MTCG.User">
     <Position X="23.75" Y="6.75" Width="1.5" />
     <AssociationLine Name="UserStash" Type="SWE1_MTCG.Stash">
@@ -41,9 +18,14 @@
   </Class>
   <Class Name="SWE1_MTCG.Stash">
     <Position X="26.5" Y="10.25" Width="1.5" />
-    <AssociationLine Name="AllOwnedCards" Type="SWE1_MTCG.ICard">
+    <AssociationLine Name="AllOwnedCards" Type="SWE1_MTCG.ICard" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="27.25" Y="11.118" />
+        <Point X="27.25" Y="12.311" />
+        <Point X="25.25" Y="12.311" />
+      </Path>
       <MemberNameLabel ManuallyPlaced="true">
-        <Position X="0.067" Y="0.111" />
+        <Position X="0.111" Y="0.067" />
       </MemberNameLabel>
     </AssociationLine>
     <TypeIdentifier>
@@ -58,16 +40,16 @@
     <Position X="21" Y="10.25" Width="1.5" />
     <AssociationLine Name="ChosenCards" Type="SWE1_MTCG.ICard" FixedFromPoint="true" FixedToPoint="true">
       <Path>
-        <Point X="21.75" Y="11.353" />
-        <Point X="21.75" Y="12.125" />
-        <Point X="23.75" Y="12.125" />
+        <Point X="21.75" Y="11.805" />
+        <Point X="21.75" Y="12.311" />
+        <Point X="23.75" Y="12.311" />
       </Path>
       <MemberNameLabel ManuallyPlaced="true">
         <Position X="0.203" Y="0.099" />
       </MemberNameLabel>
     </AssociationLine>
     <TypeIdentifier>
-      <HashCode>AAAAAAAAEAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAEAIAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Deck.cs</FileName>
     </TypeIdentifier>
     <ShowAsCollectionAssociation>
@@ -173,10 +155,28 @@
     </ShowAsAssociation>
     <Lollipop Position="0.2" />
   </Class>
+  <Class Name="SWE1_MTCG.CardSpecs">
+    <Position X="23.75" Y="13.75" Width="1.5" />
+    <AssociationLine Name="MonsterType" Type="SWE1_MTCG.EMonsterType" FixedFromPoint="true">
+      <Path>
+        <Point X="23.75" Y="14.375" />
+        <Point X="22.5" Y="14.375" />
+      </Path>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAACAAAAAAAAAAAgAEAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>CardSpecs.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Element" />
+      <Property Name="MonsterType" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
   <Interface Name="SWE1_MTCG.ICard">
     <Position X="23.75" Y="11.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAACAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAACAAAAAAAAAAAgAEAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>ICard.cs</FileName>
     </TypeIdentifier>
   </Interface>
@@ -184,8 +184,8 @@
     <Position X="5" Y="11.5" Width="1.5" />
     <AssociationLine Name="TradeCard" Type="SWE1_MTCG.ICard" FixedToPoint="true">
       <Path>
-        <Point X="6.5" Y="12.5" />
-        <Point X="23.75" Y="12.5" />
+        <Point X="6.5" Y="12.797" />
+        <Point X="23.75" Y="12.797" />
       </Path>
     </AssociationLine>
     <TypeIdentifier>
@@ -197,16 +197,16 @@
     </ShowAsAssociation>
   </Interface>
   <Enum Name="SWE1_MTCG.EElement">
-    <Position X="23.75" Y="13.75" Width="1.5" />
+    <Position X="26.5" Y="13.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAJAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAJAAAAAAAABA=</HashCode>
       <FileName>EElement.cs</FileName>
     </TypeIdentifier>
   </Enum>
   <Enum Name="SWE1_MTCG.EMonsterType">
-    <Position X="18.25" Y="13.75" Width="1.5" />
+    <Position X="21" Y="13.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAEAAAAABgAAAAAQAAAIAAAgAAIAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAEAAAAABgAAAAAQAAAIAIAgAAIAAAAAABA=</HashCode>
       <FileName>EMonsterType.cs</FileName>
     </TypeIdentifier>
   </Enum>

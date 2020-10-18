@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace SWE1_MTCG
 {
@@ -8,9 +7,18 @@ namespace SWE1_MTCG
     {
         public List<ITradeDeal> TradeDeals { get; set; }
 
-        public List<ICard> Package()
+        public static List<ICard> Package()
         {
-            throw new System.NotImplementedException();
+            List<ICard> generatedCards = new List<ICard>();
+            int[] cardArray = new int[4];
+            var rand = new Random();
+
+            for (int i = 0; i <= 4; i++)
+            {
+                generatedCards.Add(new CardSpecs(rand.Next(1, 10)));
+            }
+
+            return generatedCards;
         }
 
         public ICard Trade()

@@ -9,9 +9,11 @@ namespace SWE1_MTCG
         Knight,
         Dragon,
         Goblin,
-        Orc,
+        Ork,
         FireElve,
         Kraken,
-        Wizard
+        Wizard,
+        Spell,
+        Unknown
     }
 }

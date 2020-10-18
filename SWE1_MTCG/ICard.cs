@@ -8,5 +8,9 @@ namespace SWE1_MTCG
     {
         int Damage { get; set; }
         string Name { get; set; }
+
+        EElement Element { get; set; }
+
+        EMonsterType MonsterType { get; set; }
     }
 }

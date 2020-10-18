@@ -8,6 +8,7 @@ namespace SWE1_MTCG
     {
         fire,
         water,
-        normal
+        normal,
+        Unknown
     }
 }
