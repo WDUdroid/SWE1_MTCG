@@ -27,7 +27,7 @@
     <Position X="23.75" Y="6.75" Width="1.5" />
     <AssociationLine Name="UserStash" Type="SWE1_MTCG.Stash">
       <MemberNameLabel ManuallyPlaced="true">
-        <Position X="0.123" Y="-0.929" />
+        <Position X="-1.132" Y="0.123" />
       </MemberNameLabel>
     </AssociationLine>
     <TypeIdentifier>
