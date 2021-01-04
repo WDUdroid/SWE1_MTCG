@@ -21,9 +21,8 @@ namespace SWE1_MTCG.REST
         public Battle BattleCenter = new Battle();
 
         // for testing purposes
-        public RequestContext(List<string> messagesData)
+        public RequestContext(string receivedData)
         {
-            this.messagesData = messagesData;
         }
 
         // runs in normal operation
@@ -100,7 +99,7 @@ namespace SWE1_MTCG.REST
                     string usernameExists = data["Username"];
                     string passwordExists = data["Password"];
 
-                    if ((usernameExists == "") || (passwordExists == ""))
+                    if ((usernameExists == null) || (passwordExists == null))
                     {
                         BadRequest();
                     }
@@ -125,7 +124,7 @@ namespace SWE1_MTCG.REST
                 } 
             }
 
-            if ((HeaderInfo["RequestPath"] == "/sessions") &&
+            else if ((HeaderInfo["RequestPath"] == "/sessions") &&
                 (HeaderInfo["RequestMethod"] == "POST"))
             {
                 try
@@ -160,8 +159,8 @@ namespace SWE1_MTCG.REST
                 }
             }
 
-            if ((HeaderInfo["RequestPath"] == "/packages") &&
-                (HeaderInfo["RequestMethod"] == "POST"))
+            else if ((HeaderInfo["RequestPath"] == "/packages") &&
+                     (HeaderInfo["RequestMethod"] == "POST"))
             {
                 int check = 0;
 
@@ -213,8 +212,8 @@ namespace SWE1_MTCG.REST
                 }
             }
 
-            if ((HeaderInfo["RequestPath"] == "/transactions/packages") &&
-                (HeaderInfo["RequestMethod"] == "POST"))
+            else if ((HeaderInfo["RequestPath"] == "/transactions/packages") &&
+                     (HeaderInfo["RequestMethod"] == "POST"))
             {
                 int check = 0;
 
@@ -249,8 +248,8 @@ namespace SWE1_MTCG.REST
                 }
             }
 
-            if ((HeaderInfo["RequestPath"] == "/cards") &&
-                (HeaderInfo["RequestMethod"] == "GET"))
+            else if ((HeaderInfo["RequestPath"] == "/cards") &&
+                     (HeaderInfo["RequestMethod"] == "GET"))
             {
                 int check = 0;
 
@@ -278,8 +277,8 @@ namespace SWE1_MTCG.REST
                 }
             }
 
-            if ((HeaderInfo["RequestPath"] == "/deck") &&
-                (HeaderInfo["RequestMethod"] == "GET"))
+            else if ((HeaderInfo["RequestPath"] == "/deck") &&
+                     (HeaderInfo["RequestMethod"] == "GET"))
             {
                 int check = 0;
 
@@ -307,8 +306,37 @@ namespace SWE1_MTCG.REST
                 }
             }
 
-            if ((HeaderInfo["RequestPath"] == "/deck") &&
-                (HeaderInfo["RequestMethod"] == "PUT"))
+            else if ((HeaderInfo["RequestPath"] == "/deck?format=plain") &&
+                     (HeaderInfo["RequestMethod"] == "GET"))
+            {
+                int check = 0;
+
+                if (HeaderInfo.ContainsKey("Authorization") != true)
+                {
+                    check = 1;
+                }
+                else if (DatabaseHandler.CountOccurrence("Credentials", "token", HeaderInfo["Authorization"]) != 1)
+                {
+                    check = 1;
+                }
+
+                if (check == 1)
+                {
+                    BadRequest();
+                }
+                else
+                {
+                    StatusCode = "200 OK";
+                    ContentType = "application/json";
+                    var reply = DatabaseHandler.GetDeckPlain(HeaderInfo["Authorization"]);
+                    Payload = reply;
+                    Console.WriteLine(">>Responding with 200 OK");
+
+                }
+            }
+
+            else if ((HeaderInfo["RequestPath"] == "/deck") &&
+                     (HeaderInfo["RequestMethod"] == "PUT"))
             {
                 int check = 0;
 
@@ -359,8 +387,8 @@ namespace SWE1_MTCG.REST
                 }
             }
 
-            if ((HeaderInfo["RequestPath"].StartsWith("/users/")) &&
-                (HeaderInfo["RequestMethod"] == "GET"))
+            else if ((HeaderInfo["RequestPath"].StartsWith("/users/")) &&
+                     (HeaderInfo["RequestMethod"] == "GET"))
             {
                 int check = 0;
 
@@ -395,8 +423,8 @@ namespace SWE1_MTCG.REST
                 }
             }
 
-            if ((HeaderInfo["RequestPath"].StartsWith("/users/")) &&
-                (HeaderInfo["RequestMethod"] == "PUT"))
+            else if ((HeaderInfo["RequestPath"].StartsWith("/users/")) &&
+                     (HeaderInfo["RequestMethod"] == "PUT"))
             {
                 int check = 0;
 
@@ -442,8 +470,8 @@ namespace SWE1_MTCG.REST
                 }
             }
 
-            if ((HeaderInfo["RequestPath"].StartsWith("/stats")) &&
-                (HeaderInfo["RequestMethod"] == "GET"))
+            else if ((HeaderInfo["RequestPath"].StartsWith("/stats")) &&
+                     (HeaderInfo["RequestMethod"] == "GET"))
             {
                 int check = 0;
 
@@ -478,8 +506,8 @@ namespace SWE1_MTCG.REST
                 }
             }
 
-            if ((HeaderInfo["RequestPath"].StartsWith("/score")) &&
-                (HeaderInfo["RequestMethod"] == "GET"))
+            else if ((HeaderInfo["RequestPath"].StartsWith("/score")) &&
+                     (HeaderInfo["RequestMethod"] == "GET"))
             {
                 int check = 0;
 
@@ -514,8 +542,8 @@ namespace SWE1_MTCG.REST
                 }
             }
 
-            if ((HeaderInfo["RequestPath"].StartsWith("/tradings")) &&
-                (HeaderInfo["RequestMethod"] == "GET"))
+            else if ((HeaderInfo["RequestPath"].StartsWith("/tradings")) &&
+                     (HeaderInfo["RequestMethod"] == "GET"))
             {
                 int check = 0;
 
@@ -550,8 +578,8 @@ namespace SWE1_MTCG.REST
                 }
             }
 
-            if ((HeaderInfo["RequestPath"].StartsWith("/score")) &&
-                (HeaderInfo["RequestMethod"] == "GET"))
+            else if ((HeaderInfo["RequestPath"].StartsWith("/score")) &&
+                     (HeaderInfo["RequestMethod"] == "GET"))
             {
                 int check = 0;
 
@@ -586,8 +614,8 @@ namespace SWE1_MTCG.REST
                 }
             }
 
-            if ((HeaderInfo["RequestPath"] == "/tradings") &&
-                (HeaderInfo["RequestMethod"] == "POST"))
+            else if ((HeaderInfo["RequestPath"] == "/tradings") &&
+                     (HeaderInfo["RequestMethod"] == "POST"))
             {
                 int check = 0;
 
@@ -635,8 +663,8 @@ namespace SWE1_MTCG.REST
                 }
             }
 
-            if ((HeaderInfo["RequestPath"].StartsWith("/tradings/")) &&
-                (HeaderInfo["RequestMethod"] == "DELETE"))
+            else if ((HeaderInfo["RequestPath"].StartsWith("/tradings/")) &&
+                     (HeaderInfo["RequestMethod"] == "DELETE"))
             {
                 int check = 0;
 
@@ -671,7 +699,7 @@ namespace SWE1_MTCG.REST
                 }
             }
 
-            if ((HeaderInfo["RequestPath"].StartsWith("/tradings/")) &&
+            else if ((HeaderInfo["RequestPath"].StartsWith("/tradings/")) &&
                 (HeaderInfo["RequestMethod"] == "POST"))
             {
                 int check = 0;
@@ -713,8 +741,8 @@ namespace SWE1_MTCG.REST
                 }
             }
 
-            if ((HeaderInfo["RequestPath"] == "/battles") &&
-                (HeaderInfo["RequestMethod"] == "POST"))
+            else if ((HeaderInfo["RequestPath"] == "/battles") &&
+                     (HeaderInfo["RequestMethod"] == "POST"))
             {
                 int check = 0;
 
@@ -753,12 +781,9 @@ namespace SWE1_MTCG.REST
                         StatusCode = "100 Continue";
                         ContentType = "text/plain";
                         Payload = battleResult;
-                        Console.WriteLine("YEEEEEEEEEEEEEEEAH MAAAAAAAN FIRST SUCCESSFUL FIGHT!!!!!!!!!!");
-                        Console.WriteLine(battleResult);
                     }
                 }
             }
-
 
             else
             {

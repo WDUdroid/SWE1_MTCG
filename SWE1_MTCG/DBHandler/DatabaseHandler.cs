@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using Newtonsoft.Json;
 using Npgsql;
 using SWE1_MTCG.HelperObjects;
@@ -34,9 +33,9 @@ namespace SWE1_MTCG.DBHandler
             string sql1 = $"SELECT Count(*) FROM {fromTable} WHERE username = '{username}' AND password = '{password}'";
             using var cmd1 = new NpgsqlCommand(sql1, con);
 
-            Int64 exi = (Int64)cmd1.ExecuteScalar();
+                long exi = (long) cmd1.ExecuteScalar();
 
-            if (exi <= 0) return "-1";
+                if (exi <= 0) return "-1";
 
             string sql2 = $"SELECT token FROM {fromTable} WHERE username = '{username}' AND password = '{password}'";
             using var cmd2 = new NpgsqlCommand(sql2, con);
@@ -60,21 +59,21 @@ namespace SWE1_MTCG.DBHandler
                 string sql1 = $"SELECT Count(*) FROM CARDS WHERE name = '{data[i]["Name"]}'";
                 using var cmd1 = new NpgsqlCommand(sql1, con);
 
-                Int64 exi = (Int64)cmd1.ExecuteScalar();
+                long exi = (long)cmd1.ExecuteScalar();
 
                 if (exi <= 0) return -1;
 
                 string sql2 = $"SELECT Count(*) FROM T_PACKAGE WHERE cardid = '{data[i]["Id"]}'";
                 using var cmd2 = new NpgsqlCommand(sql2, con);
 
-                exi = (Int64)cmd2.ExecuteScalar();
+                exi = (long)cmd2.ExecuteScalar();
 
                 if (exi > 0) return -1;
 
                 string sql3 = $"SELECT Count(*) FROM STACK WHERE cardid = '{data[i]["Id"]}'";
                 using var cmd3 = new NpgsqlCommand(sql2, con);
 
-                exi = (Int64)cmd3.ExecuteScalar();
+                exi = (long)cmd3.ExecuteScalar();
 
                 if (exi > 0) return -1;
 
@@ -109,7 +108,7 @@ namespace SWE1_MTCG.DBHandler
             string sql = $"SELECT Count(*) FROM {fromTable} WHERE {columnName} = '{whereCondition}'";
             using var cmd = new NpgsqlCommand(sql, con);
 
-            Int64 exi = (Int64) cmd.ExecuteScalar();
+            long exi = (long) cmd.ExecuteScalar();
 
             return exi;
         }
@@ -121,7 +120,7 @@ namespace SWE1_MTCG.DBHandler
             string sql = $"SELECT ID FROM CREDENTIALS WHERE username = '{username}'";
             using var cmd1 = new NpgsqlCommand(sql, con);
 
-            Int64 userID = (Int64)cmd1.ExecuteScalar();
+            long userID = (long)cmd1.ExecuteScalar();
 
             using var cmd2 = new NpgsqlCommand();
             cmd2.Connection = con;
@@ -180,10 +179,10 @@ namespace SWE1_MTCG.DBHandler
             string sql3 = $"SELECT id FROM CREDENTIALS WHERE token = '{token}'";
             using var cmd3 = new NpgsqlCommand(sql3, con);
 
-            Int64 personID = 0;
+            long personId = 0;
 
             if (cmd3.ExecuteScalar() == DBNull.Value) return -1;
-            else personID = (Int64)cmd3.ExecuteScalar();
+            else personId = (long)cmd3.ExecuteScalar();
             con.Close();
 
             using var con2 = new NpgsqlConnection(ConnectionString);
@@ -198,13 +197,13 @@ namespace SWE1_MTCG.DBHandler
             while (reader.Read())
             {
                 
-                string cardID = reader.GetString(reader.GetOrdinal("cardid"));
+                string cardId = reader.GetString(reader.GetOrdinal("cardid"));
                 string name = reader.GetString(reader.GetOrdinal("name"));
                 int damage = reader.GetInt32(reader.GetOrdinal("damage"));
 
                 using var con3 = new NpgsqlConnection(ConnectionString);
                 con3.Open();
-                string sqlDropFromPackage = $"DELETE FROM T_PACKAGE WHERE cardid = '{cardID}'";
+                string sqlDropFromPackage = $"DELETE FROM T_PACKAGE WHERE cardid = '{cardId}'";
                 using var cmdDropFromPackage = new NpgsqlCommand(sqlDropFromPackage, con3);
                 cmdDropFromPackage.ExecuteNonQuery();
                 cmdDropFromPackage.Dispose();
@@ -213,7 +212,7 @@ namespace SWE1_MTCG.DBHandler
                 using var con4 = new NpgsqlConnection(ConnectionString);
                 con4.Open();
                 string sqlInsertIntoStack = $"INSERT INTO STACK (personID, cardID, name, damage) " +
-                                             $"VALUES ({personID}, '{cardID}', '{name}', {damage})";
+                                             $"VALUES ({personId}, '{cardId}', '{name}', {damage})";
                 using var cmdInsertIntoStack = new NpgsqlCommand(sqlInsertIntoStack, con4);
                 cmdInsertIntoStack.ExecuteNonQuery();
                 cmdInsertIntoStack.Dispose();
@@ -224,7 +223,7 @@ namespace SWE1_MTCG.DBHandler
             con5.Open();
             string sqlUpdateCoins = $"UPDATE T_COINS " +
                                     $"SET coins = {coinsOwned - 5}" +
-                                    $"WHERE personID = {personID}";
+                                    $"WHERE personID = {personId}";
             using var cmdUpdateCoins = new NpgsqlCommand(sqlUpdateCoins, con5);
             cmdUpdateCoins.ExecuteNonQuery();
             cmdUpdateCoins.Dispose();
@@ -240,16 +239,16 @@ namespace SWE1_MTCG.DBHandler
             string sql1 = $"SELECT id FROM CREDENTIALS WHERE token = '{token}'";
             using var cmd1 = new NpgsqlCommand(sql1, con1);
 
-            Int64 personID = 0;
+            long personId = 0;
 
             if ((cmd1.ExecuteScalar() == DBNull.Value) || (cmd1.ExecuteScalar() == null)) return "-1";
-            else personID = (Int64)cmd1.ExecuteScalar();
+            else personId = (long)cmd1.ExecuteScalar();
             con1.Close();
 
             using var con2 = new NpgsqlConnection(ConnectionString);
             con2.Open();
 
-            string sql2 = $"SELECT * FROM STACK WHERE personID = {personID}";
+            string sql2 = $"SELECT * FROM STACK WHERE personID = {personId}";
             using var cmd2 = new NpgsqlCommand(sql2, con2);
 
             using var reader = cmd2.ExecuteReader();
@@ -260,10 +259,10 @@ namespace SWE1_MTCG.DBHandler
             {
 
                 string name = reader.GetString(reader.GetOrdinal("name"));
-                string cardID = reader.GetString(reader.GetOrdinal("cardid"));
+                string cardId = reader.GetString(reader.GetOrdinal("cardid"));
                 int damage = reader.GetInt32(reader.GetOrdinal("damage"));
 
-                var tmpObject = new CardReturner(name, cardID, damage);
+                var tmpObject = new CardReturner(name, cardId, damage);
 
                 cardList.Add(tmpObject);
             }
@@ -280,16 +279,16 @@ namespace SWE1_MTCG.DBHandler
             string sql1 = $"SELECT id FROM CREDENTIALS WHERE token = '{token}'";
             using var cmd1 = new NpgsqlCommand(sql1, con1);
 
-            Int64 personID = 0;
+            long personId = 0;
 
             if ((cmd1.ExecuteScalar() == DBNull.Value) || (cmd1.ExecuteScalar() == null)) return "-1";
-            else personID = (Int64)cmd1.ExecuteScalar();
+            else personId = (long)cmd1.ExecuteScalar();
             con1.Close();
 
             using var con2 = new NpgsqlConnection(ConnectionString);
             con2.Open();
 
-            string sql2 = $"SELECT * FROM DECK WHERE personID = {personID}";
+            string sql2 = $"SELECT * FROM DECK WHERE personID = {personId}";
             using var cmd2 = new NpgsqlCommand(sql2, con2);
 
             using var deckReader = cmd2.ExecuteReader();
@@ -298,12 +297,12 @@ namespace SWE1_MTCG.DBHandler
 
             while (deckReader.Read())
             {
-                string deckCardID = deckReader.GetString(deckReader.GetOrdinal("cardid"));
+                string deckCardId = deckReader.GetString(deckReader.GetOrdinal("cardid"));
 
                 using var con3 = new NpgsqlConnection(ConnectionString);
                 con3.Open();
 
-                string sql3 = $"SELECT * FROM STACK WHERE cardID = '{deckCardID}'";
+                string sql3 = $"SELECT * FROM STACK WHERE cardID = '{deckCardId}'";
                 using var cmd3 = new NpgsqlCommand(sql3, con3);
 
                 using var stackReader = cmd3.ExecuteReader();
@@ -311,14 +310,63 @@ namespace SWE1_MTCG.DBHandler
                 while (stackReader.Read())
                 {
                     string name = stackReader.GetString(stackReader.GetOrdinal("name"));
-                    string cardID = stackReader.GetString(stackReader.GetOrdinal("cardid"));
+                    string cardId = stackReader.GetString(stackReader.GetOrdinal("cardid"));
                     int damage = stackReader.GetInt32(stackReader.GetOrdinal("damage"));
-                    var tmpObject = new CardReturner(name, cardID, damage);
+                    var tmpObject = new CardReturner(name, cardId, damage);
                     cardList.Add(tmpObject);
                 }
             }
 
             return JsonConvert.SerializeObject(cardList);
+        }
+        public static string GetDeckPlain(string token)
+        {
+
+
+            using var con1 = new NpgsqlConnection(ConnectionString);
+            con1.Open();
+
+            string sql1 = $"SELECT id FROM CREDENTIALS WHERE token = '{token}'";
+            using var cmd1 = new NpgsqlCommand(sql1, con1);
+
+            long personId = 0;
+
+            if ((cmd1.ExecuteScalar() == DBNull.Value) || (cmd1.ExecuteScalar() == null)) return "-1";
+            else personId = (long)cmd1.ExecuteScalar();
+            con1.Close();
+
+            using var con2 = new NpgsqlConnection(ConnectionString);
+            con2.Open();
+
+            string sql2 = $"SELECT * FROM DECK WHERE personID = {personId}";
+            using var cmd2 = new NpgsqlCommand(sql2, con2);
+
+            using var deckReader = cmd2.ExecuteReader();
+
+            var cardList = "";
+
+            while (deckReader.Read())
+            {
+                string deckCardId = deckReader.GetString(deckReader.GetOrdinal("cardid"));
+
+                using var con3 = new NpgsqlConnection(ConnectionString);
+                con3.Open();
+
+                string sql3 = $"SELECT * FROM STACK WHERE cardID = '{deckCardId}'";
+                using var cmd3 = new NpgsqlCommand(sql3, con3);
+
+                using var stackReader = cmd3.ExecuteReader();
+
+                while (stackReader.Read())
+                {
+                    string name = stackReader.GetString(stackReader.GetOrdinal("name"));
+                    string cardId = stackReader.GetString(stackReader.GetOrdinal("cardid"));
+                    int damage = stackReader.GetInt32(stackReader.GetOrdinal("damage"));
+                    cardList += $"Card: {name} / CardID: {cardId} / Damage: {damage}\r\n";
+                }
+            }
+
+            return cardList;
         }
         public static string ConfigureDeck(dynamic data, string token)
         {
@@ -330,10 +378,10 @@ namespace SWE1_MTCG.DBHandler
             string sql1 = $"SELECT id FROM CREDENTIALS WHERE token = '{token}'";
             using var cmd1 = new NpgsqlCommand(sql1, con1);
 
-            Int64 personID = 0;
+            long personId = 0;
 
             if ((cmd1.ExecuteScalar() == DBNull.Value) || (cmd1.ExecuteScalar() == null)) return "-1";
-            else personID = (Int64)cmd1.ExecuteScalar();
+            else personId = (long)cmd1.ExecuteScalar();
             con1.Close();
 
             long doTheyExist = 0;
@@ -344,11 +392,11 @@ namespace SWE1_MTCG.DBHandler
                 using var con2 = new NpgsqlConnection(ConnectionString);
                 con2.Open();
 
-                string sql2 = $"SELECT COUNT(*) FROM STACK WHERE personID = {personID} AND cardID = '{data[i]}'";
+                string sql2 = $"SELECT COUNT(*) FROM STACK WHERE personID = {personId} AND cardID = '{data[i]}'";
                 using var cmd2 = new NpgsqlCommand(sql2, con2);
 
                 if ((cmd2.ExecuteScalar() == DBNull.Value) || (cmd2.ExecuteScalar() == null)) return "-1";
-                else doTheyExist += (Int64)cmd2.ExecuteScalar();
+                else doTheyExist += (long)cmd2.ExecuteScalar();
                 con2.Close();
 
             }
@@ -367,7 +415,7 @@ namespace SWE1_MTCG.DBHandler
                 using var cmd2 = new NpgsqlCommand(sql2, con2);
 
                 if ((cmd2.ExecuteScalar() == DBNull.Value) || (cmd2.ExecuteScalar() == null)) return "-1";
-                else alreadyInTrade += (Int64)cmd2.ExecuteScalar();
+                else alreadyInTrade += (long)cmd2.ExecuteScalar();
                 con2.Close();
 
             }
@@ -380,7 +428,7 @@ namespace SWE1_MTCG.DBHandler
             using var con3 = new NpgsqlConnection(ConnectionString);
             con3.Open();
 
-            string sql3 = $"DELETE FROM DECK WHERE personID = {personID}";
+            string sql3 = $"DELETE FROM DECK WHERE personID = {personId}";
             using var cmd3 = new NpgsqlCommand(sql3, con3);
             cmd3.ExecuteNonQuery();
             con3.Close();
@@ -391,7 +439,7 @@ namespace SWE1_MTCG.DBHandler
             for (int i = 0; i <= 3; i++)
             {
                 string sql4 = $"INSERT INTO DECK (personID, cardID) " +
-                              $"VALUES ({personID}, '{data[i]}')";
+                              $"VALUES ({personId}, '{data[i]}')";
                 using var cmd4 = new NpgsqlCommand(sql4, con4);
                 cmd4.ExecuteNonQuery();
             }
@@ -410,10 +458,10 @@ namespace SWE1_MTCG.DBHandler
             string sql1 = $"SELECT id FROM CREDENTIALS WHERE token = '{token}'";
             using var cmd1 = new NpgsqlCommand(sql1, con1);
 
-            Int64 personID = 0;
+            long personId = 0;
 
             if ((cmd1.ExecuteScalar() == DBNull.Value) || (cmd1.ExecuteScalar() == null)) return "-1";
-            else personID = (Int64)cmd1.ExecuteScalar();
+            else personId = (long)cmd1.ExecuteScalar();
             con1.Close();
 
 
@@ -423,13 +471,13 @@ namespace SWE1_MTCG.DBHandler
             string sqlComp = $"SELECT id FROM CREDENTIALS WHERE username = '{pathFilter[2]}'";
             using var cmdComp = new NpgsqlCommand(sqlComp, conComp);
 
-            Int64 personIDComp = 0;
+            long personIdComp = 0;
 
             if ((cmdComp.ExecuteScalar() == DBNull.Value) || (cmdComp.ExecuteScalar() == null)) return "-1";
-            else personIDComp = (Int64)cmdComp.ExecuteScalar();
+            else personIdComp = (long)cmdComp.ExecuteScalar();
             conComp.Close();
 
-            if (personID != personIDComp)
+            if (personId != personIdComp)
             {
                 return "-1";
             }
@@ -437,7 +485,7 @@ namespace SWE1_MTCG.DBHandler
             using var con2 = new NpgsqlConnection(ConnectionString);
             con2.Open();
 
-            string sql2 = $"SELECT * FROM t_page WHERE personID = {personID}";
+            string sql2 = $"SELECT * FROM t_page WHERE personID = {personId}";
             using var cmd2 = new NpgsqlCommand(sql2, con2);
 
             using var reader = cmd2.ExecuteReader();
@@ -463,10 +511,10 @@ namespace SWE1_MTCG.DBHandler
             string sql1 = $"SELECT id FROM CREDENTIALS WHERE token = '{token}'";
             using var cmd1 = new NpgsqlCommand(sql1, con1);
 
-            Int64 personID = 0;
+            long personId = 0;
 
             if ((cmd1.ExecuteScalar() == DBNull.Value) || (cmd1.ExecuteScalar() == null)) return -1;
-            else personID = (Int64)cmd1.ExecuteScalar();
+            else personId = (long)cmd1.ExecuteScalar();
             con1.Close();
 
 
@@ -476,13 +524,13 @@ namespace SWE1_MTCG.DBHandler
             string sqlComp = $"SELECT id FROM CREDENTIALS WHERE username = '{pathFilter[2]}'";
             using var cmdComp = new NpgsqlCommand(sqlComp, conComp);
 
-            Int64 personIDComp = 0;
+            long personIdComp = 0;
 
             if ((cmdComp.ExecuteScalar() == DBNull.Value) || (cmdComp.ExecuteScalar() == null)) return -1;
-            else personIDComp = (Int64)cmdComp.ExecuteScalar();
+            else personIdComp = (long)cmdComp.ExecuteScalar();
             conComp.Close();
 
-            if (personID != personIDComp)
+            if (personId != personIdComp)
             {
                 return -1;
             }
@@ -490,7 +538,7 @@ namespace SWE1_MTCG.DBHandler
             using var con2 = new NpgsqlConnection(ConnectionString);
             con2.Open();
 
-            string sql2 = $"DELETE FROM T_PAGE WHERE personID = {personID}";
+            string sql2 = $"DELETE FROM T_PAGE WHERE personID = {personId}";
             using var cmd2 = new NpgsqlCommand(sql2, con2);
 
             cmd2.ExecuteNonQuery();
@@ -500,7 +548,7 @@ namespace SWE1_MTCG.DBHandler
             con3.Open();
 
             string sql3 = $"INSERT INTO T_PAGE (personID, name, bio, image) " +
-                          $"VALUES ({personID}, '{data["Name"]}', '{data["Bio"]}', '{data["Image"]}')";
+                          $"VALUES ({personId}, '{data["Name"]}', '{data["Bio"]}', '{data["Image"]}')";
             using var cmd3 = new NpgsqlCommand(sql3, con3);
 
             cmd3.ExecuteNonQuery();
@@ -516,17 +564,17 @@ namespace SWE1_MTCG.DBHandler
             string sql1 = $"SELECT id FROM CREDENTIALS WHERE token = '{token}'";
             using var cmd1 = new NpgsqlCommand(sql1, con1);
 
-            Int64 personID = 0;
+            long personId = 0;
 
             if ((cmd1.ExecuteScalar() == DBNull.Value) || (cmd1.ExecuteScalar() == null)) return "-1";
-            else personID = (Int64)cmd1.ExecuteScalar();
+            else personId = (long)cmd1.ExecuteScalar();
             con1.Close();
 
 
             using var con2 = new NpgsqlConnection(ConnectionString);
             con2.Open();
 
-            string sql2 = $"SELECT * FROM t_elo WHERE personID = {personID}";
+            string sql2 = $"SELECT * FROM t_elo WHERE personID = {personId}";
             using var cmd2 = new NpgsqlCommand(sql2, con2);
 
             using var reader = cmd2.ExecuteReader();
@@ -539,7 +587,7 @@ namespace SWE1_MTCG.DBHandler
             using var con2 = new NpgsqlConnection(ConnectionString);
             con2.Open();
 
-            string sql2 = $"SELECT * FROM T_ELO INNER JOIN CREDENTIALS ON personID = ID ORDER BY ELO";
+            string sql2 = $"SELECT * FROM T_ELO INNER JOIN CREDENTIALS ON personID = ID ORDER BY ELO DESC";
             using var cmd2 = new NpgsqlCommand(sql2, con2);
 
             using var reader = cmd2.ExecuteReader();
@@ -599,13 +647,13 @@ namespace SWE1_MTCG.DBHandler
             string sql1 = $"SELECT id FROM CREDENTIALS WHERE token = '{token}'";
             using var cmd1 = new NpgsqlCommand(sql1, con1);
 
-            Int64 personID = 0;
+            long personId = 0;
 
             if ((cmd1.ExecuteScalar() == DBNull.Value) || (cmd1.ExecuteScalar() == null))
             {
                 return "-1";
             }
-            else personID = (Int64)cmd1.ExecuteScalar();
+            else personId = (long)cmd1.ExecuteScalar();
             con1.Close();
 
             long doTheyExist = 0;
@@ -615,14 +663,14 @@ namespace SWE1_MTCG.DBHandler
             using var con2 = new NpgsqlConnection(ConnectionString);
             con2.Open();
 
-            string sql2 = $"SELECT COUNT(*) FROM STACK WHERE personID = {personID} AND cardID = '{data["CardToTrade"]}'";
+            string sql2 = $"SELECT COUNT(*) FROM STACK WHERE personID = {personId} AND cardID = '{data["CardToTrade"]}'";
             using var cmd2 = new NpgsqlCommand(sql2, con2);
 
             if ((cmd2.ExecuteScalar() == DBNull.Value) || (cmd2.ExecuteScalar() == null))
             {
                 return "-1";
             }
-            else doTheyExist += (Int64)cmd2.ExecuteScalar();
+            else doTheyExist += (long)cmd2.ExecuteScalar();
             con2.Close();
 
             
@@ -637,14 +685,14 @@ namespace SWE1_MTCG.DBHandler
             using var conW = new NpgsqlConnection(ConnectionString);
             conW.Open();
 
-            string sqlW = $"SELECT COUNT(*) FROM STACK WHERE personID = {personID} AND cardID = '{data["CardToTrade"]}'";
+            string sqlW = $"SELECT COUNT(*) FROM STACK WHERE personID = {personId} AND cardID = '{data["CardToTrade"]}'";
             using var cmdW = new NpgsqlCommand(sqlW, conW);
 
             if ((cmdW.ExecuteScalar() == DBNull.Value) || (cmdW.ExecuteScalar() == null))
             {
                 return "-1";
             }
-            else cardInStack += (Int64)cmdW.ExecuteScalar();
+            else cardInStack += (long)cmdW.ExecuteScalar();
             conW.Close();
 
             if (cardInStack != 1)
@@ -664,7 +712,7 @@ namespace SWE1_MTCG.DBHandler
             {
                 return "-1";
             }
-            else idInTrade += (Int64)cmdTrade.ExecuteScalar();
+            else idInTrade += (long)cmdTrade.ExecuteScalar();
             conTrade.Close();
 
 
@@ -685,7 +733,7 @@ namespace SWE1_MTCG.DBHandler
             {
                 return "-1";
             }
-            else alreadyInDeck += (Int64)cmdD.ExecuteScalar();
+            else alreadyInDeck += (long)cmdD.ExecuteScalar();
             conD.Close();
             
 
@@ -706,7 +754,7 @@ namespace SWE1_MTCG.DBHandler
             {
                 return "-1";
             }
-            else alreadyInTrade += (Int64)cmdT.ExecuteScalar();
+            else alreadyInTrade += (long)cmdT.ExecuteScalar();
             conT.Close();
 
 
@@ -727,7 +775,7 @@ namespace SWE1_MTCG.DBHandler
             }
 
             string sql3 = $"INSERT INTO T_TRADE (traderID, dealid, cardtoid, wantedtyp, minimumDamage) " +
-                          $"VALUES ({personID}, '{data["Id"]}', '{data["CardToTrade"]}', '{type}', {data["MinimumDamage"]})";
+                          $"VALUES ({personId}, '{data["Id"]}', '{data["CardToTrade"]}', '{type}', {data["MinimumDamage"]})";
             using var cmd3 = new NpgsqlCommand(sql3, con3);
             cmd3.ExecuteNonQuery();
             con3.Close();
@@ -745,13 +793,13 @@ namespace SWE1_MTCG.DBHandler
             string sql1 = $"SELECT id FROM CREDENTIALS WHERE token = '{token}'";
             using var cmd1 = new NpgsqlCommand(sql1, con1);
 
-            Int64 personID = 0;
+            long personId = 0;
 
             if ((cmd1.ExecuteScalar() == DBNull.Value) || (cmd1.ExecuteScalar() == null))
             {
                 return "-1";
             }
-            else personID = (Int64)cmd1.ExecuteScalar();
+            else personId = (long)cmd1.ExecuteScalar();
             con1.Close();
 
             using var con2 = new NpgsqlConnection(ConnectionString);
@@ -760,16 +808,16 @@ namespace SWE1_MTCG.DBHandler
             string sql2 = $"SELECT traderID FROM T_TRADE WHERE dealID = '{pathFilter[2]}'";
             using var cmd2 = new NpgsqlCommand(sql2, con2);
 
-            Int32 personIDComp = 0;
+            int personIdComp = 0;
 
             if ((cmd2.ExecuteScalar() == DBNull.Value) || (cmd2.ExecuteScalar() == null))
             {
                 return "-1";
             }
-            else personIDComp = (Int32)cmd2.ExecuteScalar();
+            else personIdComp = (int)cmd2.ExecuteScalar();
             con2.Close();
 
-            if (personIDComp != personID) return "-1";
+            if (personIdComp != personId) return "-1";
 
             using var con3 = new NpgsqlConnection(ConnectionString);
             con3.Open();
@@ -793,13 +841,13 @@ namespace SWE1_MTCG.DBHandler
             string sql1 = $"SELECT id FROM CREDENTIALS WHERE token = '{token}'";
             using var cmd1 = new NpgsqlCommand(sql1, con1);
 
-            Int64 personID = 0;
+            long personId = 0;
 
             if ((cmd1.ExecuteScalar() == DBNull.Value) || (cmd1.ExecuteScalar() == null))
             {
                 return "-1";
             }
-            else personID = (Int64)cmd1.ExecuteScalar();
+            else personId = (long)cmd1.ExecuteScalar();
             con1.Close();
 
 
@@ -809,16 +857,16 @@ namespace SWE1_MTCG.DBHandler
             string sqlComp = $"SELECT traderID FROM T_TRADE WHERE dealID = '{pathFilter[2]}'";
             using var cmdComp = new NpgsqlCommand(sqlComp, conComp);
 
-            Int32 personIDComp = 0;
+            int personIdComp = 0;
 
             if ((cmdComp.ExecuteScalar() == DBNull.Value) || (cmdComp.ExecuteScalar() == null))
             {
                 return "-1";
             }
-            else personIDComp = (Int32)cmdComp.ExecuteScalar();
+            else personIdComp = (int)cmdComp.ExecuteScalar();
             conComp.Close();
 
-            if (personIDComp == personID)
+            if (personIdComp == personId)
             {
                 return "-1";
             }
@@ -830,13 +878,13 @@ namespace SWE1_MTCG.DBHandler
             string sql2 = $"SELECT COUNT(*) FROM T_TRADE WHERE dealID = '{pathFilter[2]}'";
             using var cmd2 = new NpgsqlCommand(sql2, con2);
 
-            Int64 dealExists = 0;
+            long dealExists = 0;
 
             if ((cmd2.ExecuteScalar() == DBNull.Value) || (cmd2.ExecuteScalar() == null))
             {
                 return "-1";
             }
-            else dealExists = (Int64)cmd2.ExecuteScalar();
+            else dealExists = (long)cmd2.ExecuteScalar();
             con2.Close();
 
             if (dealExists != 1)
@@ -848,16 +896,16 @@ namespace SWE1_MTCG.DBHandler
             using var con3 = new NpgsqlConnection(ConnectionString);
             con3.Open();
 
-            Int64 personHasCard = 0;
+            long personHasCard = 0;
 
-            string sql3 = $"SELECT COUNT(*) FROM STACK WHERE cardID = '{data}' AND personID = {personID}";
+            string sql3 = $"SELECT COUNT(*) FROM STACK WHERE cardID = '{data}' AND personID = {personId}";
             using var cmd3 = new NpgsqlCommand(sql3, con3);
 
             if ((cmd3.ExecuteScalar() == DBNull.Value) || (cmd3.ExecuteScalar() == null))
             {
                 return "-1";
             }
-            else personHasCard = (Int64)cmd3.ExecuteScalar();
+            else personHasCard = (long)cmd3.ExecuteScalar();
             con3.Close();
 
             if (personHasCard != 1)
@@ -933,7 +981,7 @@ namespace SWE1_MTCG.DBHandler
             using var con8 = new NpgsqlConnection(ConnectionString);
             con8.Open();
 
-            string sql8 = $"UPDATE STACK SET personID = {personID} WHERE cardID = '{presentedCard}'";
+            string sql8 = $"UPDATE STACK SET personID = {personId} WHERE cardID = '{presentedCard}'";
             using var cmd8 = new NpgsqlCommand(sql8, con8);
             cmd8.ExecuteNonQuery();
 

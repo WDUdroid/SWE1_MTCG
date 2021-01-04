@@ -83,7 +83,7 @@ namespace SWE1_MTCG
             webHandler.SendHttpContent();
             Console.WriteLine("------------SENT RESPONSE END------------\n");
 
-            tcpHandler.CloseClient();
+            tcpHandler.CloseClient(webHandler.Client);
 
             ConcurrentConnections.Release();
             Console.WriteLine(">>Client finished\n\n\n\n\n");

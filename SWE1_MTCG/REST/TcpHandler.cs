@@ -8,7 +8,7 @@ namespace SWE1_MTCG.REST
     class TcpHandler : ITcpHandler
     {
         private TcpListener _server;
-        public TcpClient _client;
+        //public TcpClient _client;
 
         public TcpHandler()
         {
@@ -17,27 +17,31 @@ namespace SWE1_MTCG.REST
             _server.Start(5);
         }
 
-        public void AcceptTcpClient()
+        public TcpClient AcceptTcpClient()
         {
             Console.WriteLine(">>>>>>>>>>Waiting for a client<<<<<<<<<<");
             Console.WriteLine("...");
 
-            _client = _server.AcceptTcpClient();
+            var client = _server.AcceptTcpClient();
 
             Console.WriteLine(">>Servicing client");
             Console.WriteLine("...");
+
+            return client;
         }
 
-        public Stream GetStream() => _client.GetStream();
-        public void CloseClient() => _client.Close();
+        public Stream GetStream(TcpClient client)
+        {
+            return client.GetStream();
+        }
+
+        public void CloseClient(TcpClient client) => client.Close();
 
         public void Stop() => _server.Stop();
 
-        public int DataAvailable() => _client.Available;
-
-        public void Dispose()
+        public int DataAvailable(TcpClient client)
         {
-            _client.Dispose();
+            return client.Available;
         }
     }
 }

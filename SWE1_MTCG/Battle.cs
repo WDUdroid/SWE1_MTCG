@@ -81,6 +81,7 @@ namespace SWE1_MTCG
                     Views++;
                     if (Views == 2)
                     {
+                        Views = 0;
                         Result.Clear();
                     }
                     return resultBite;
@@ -93,9 +94,6 @@ namespace SWE1_MTCG
             Random randomPlayer0 = new Random();
             Random randomPlayer1 = new Random();
 
-            int chosenCardPlayer0 = 0;
-            int chosenCardPlayer1 = 0;
-
             var rounds = 1;
             string battleLog = "";
 
@@ -105,9 +103,10 @@ namespace SWE1_MTCG
 
                 double player0x = 1;
                 double player1x = 1;
+                string bonusMessage = "";
 
-                chosenCardPlayer0 = randomPlayer0.Next(0, Challengers[0].ChallengerDeck.Count - 1);
-                chosenCardPlayer1 = randomPlayer1.Next(0, Challengers[1].ChallengerDeck.Count - 1);
+                var chosenCardPlayer0 = randomPlayer0.Next(0, Challengers[0].ChallengerDeck.Count);
+                var chosenCardPlayer1 = randomPlayer1.Next(0, Challengers[1].ChallengerDeck.Count);
 
                 var player0Card = Challengers[0].ChallengerDeck[chosenCardPlayer0];
                 var player1Card = Challengers[1].ChallengerDeck[chosenCardPlayer1];
@@ -115,24 +114,62 @@ namespace SWE1_MTCG
                 // Monster vs Monster
                 if ((player0Card.Type == "Monster") && (player1Card.Type == "Monster"))
                 {
-                    // Goblin against Droagon
+                    // Goblin against Dragon
                     if ((player0Card.Name.Contains("Goblin")) && (player1Card.Name.Contains("Dragon")))
                     {
                         player0x = 0;
+
+                        //Chosen Goblin
+                        Random player0ChosenGoblin = new Random();
+                        if (player0ChosenGoblin.Next(0, 50) == 50)
+                        {
+                            player0x = 10;
+                            bonusMessage = "THE CHOSEN GOBIN HAS RISEN AND GAINED 10 TIMES ITS STRENGTH AGAINST ITS COLDBLOODED NIGHTMARE!!!\r\n";
+                        }
+
+
                     }
                     if ((player1Card.Name.Contains("Goblin")) && (player0Card.Name.Contains("Dragon")))
                     {
                         player1x = 0;
+
+                        //Chosen Goblin
+                        Random player1ChosenGoblin = new Random();
+                        if (player1ChosenGoblin.Next(0, 50) == 50)
+                        {
+                            player1x = 10;
+                            bonusMessage = "THE CHOSEN GOBIN HAS RISEN AND GAINED 10 TIMES ITS STRENGTH AGAINST ITS COLDBLOODED NIGHTMARE!!!\r\n";
+                        }
                     }
 
                     //Wizzard against Ork
                     if ((player0Card.Name.Contains("Ork")) && (player1Card.Name.Contains("Wizzard")))
                     {
                         player0x = 0;
+
+                        //Wizzard died of old age
+                        Random player0WizzardDied = new Random();
+                        if (player0WizzardDied.Next(0, 10) == 10)
+                        {
+                            player0x = 1;
+                            player1x = 0;
+                            bonusMessage = $"You know how it is :( Wizzards are old, they die sometimes, " +
+                                           $"but at least they get reborn in the next round, just in the other deck... Muuuhaaaahaaaa\r\n";
+                        }
                     }
                     if ((player1Card.Name.Contains("Ork")) && (player0Card.Name.Contains("Wizzard")))
                     {
                         player1x = 0;
+
+                        //Wizzard died of old age
+                        Random player1WizzardDied = new Random();
+                        if (player1WizzardDied.Next(0, 10) == 10)
+                        {
+                            player0x = 0;
+                            player1x = 1;
+                            bonusMessage = $"You know how it is :( Wizzards are old, they die sometimes, " +
+                                           $"but at least they get reborn in the next round, just in the other deck... Muuuhaaaahaaaa\r\n";
+                        }
                     }
 
                     //FireElf against Dragon
@@ -322,28 +359,38 @@ namespace SWE1_MTCG
                     {
                         player1x = 0.5;
                     }
+
+                    //Hides your Type wildcard
+                    Random stupidGameMaster = new Random();
+                    if (stupidGameMaster.Next(0, 2) == 1)
+                    {
+                        player0x = 1;
+                        player1x = 1;
+                        bonusMessage = $"The Game Master forgot which type your cards were. Ah who cares, just compare their damage stats.\r\n";
+                    }
+
                 }
 
-                var roundString = $"{player0Card.Name} with a Dmg-Level of (Dmg * multi) {player0Card.Damage * player0x} " +
+                var roundString = $"{bonusMessage} {player0Card.Name} with a Dmg-Level of (Dmg * multi) {player0Card.Damage * player0x} " +
                                   $"fought against the almighty {player1Card.Name}, Dmg-Level (Dmg * multi) {player1Card.Damage * player1x} and ";
 
                 if (player0Card.Damage * player0x > player1Card.Damage * player1x)
                 {
-                    roundString += "won this round!\r\n";
+                    roundString += "won this round!\r\n\r\n";
                     Challengers[1].ChallengerDeck.RemoveAt(chosenCardPlayer1);
                     Challengers[0].ChallengerDeck.Add(player1Card);
                 }
 
                 if (player1Card.Damage * player1x > player0Card.Damage * player0x)
                 {
-                    roundString += "lost this round!\r\n";
+                    roundString += "lost this round!\r\n\r\n";
                     Challengers[0].ChallengerDeck.RemoveAt(chosenCardPlayer0);
-                    Challengers[1].ChallengerDeck.Add(player1Card);
+                    Challengers[1].ChallengerDeck.Add(player0Card);
                 }
 
                 if (player0Card.Damage * player0x == player1Card.Damage * player1x)
                 {
-                    roundString += "it was a draw... :(\r\n";
+                    roundString += "it was a draw... :(\r\n\r\n";
                 }
 
                 battleLog += roundString;
@@ -387,7 +434,7 @@ namespace SWE1_MTCG
 
             eloRead1Reader.Read();
             int player1Elo = eloRead1Reader.GetInt32(eloRead1Reader.GetOrdinal("elo"));
-            int player1id = eloRead1Reader.GetInt32(eloRead1Reader.GetOrdinal("id"));
+            int player1Id = eloRead1Reader.GetInt32(eloRead1Reader.GetOrdinal("id"));
 
             conEloRead1.Close();
 
@@ -404,22 +451,22 @@ namespace SWE1_MTCG
 
             eloRead0Reader.Read();
             int player0Elo = eloRead0Reader.GetInt32(eloRead0Reader.GetOrdinal("elo"));
-            int player0id = eloRead0Reader.GetInt32(eloRead0Reader.GetOrdinal("id"));
+            int player0Id = eloRead0Reader.GetInt32(eloRead0Reader.GetOrdinal("id"));
 
             conEloRead0.Close();
 
             if (Challengers[0].ChallengerDeck.Count == 0)
             {
-                battleLog += $"{player0Username} lost / {player1Username} won with {rounds} rounds played\r\n";
-                player0Elo = player0Elo + 3;
-                player1Elo = player1Elo - 5;
+                battleLog += $"{player1Username} won / {player0Username} lost with {rounds} rounds played\r\n";
+                player0Elo = player0Elo - 5;
+                player1Elo = player1Elo + 3;
             }
 
             if (Challengers[0].ChallengerDeck.Count == 8)
             {
                 battleLog += $"{player0Username} won / {player1Username} lost with {rounds} rounds played\r\n";
-                player1Elo = player1Elo + 3;
-                player0Elo = player0Elo - 5;
+                player1Elo = player1Elo - 5;
+                player0Elo = player0Elo + 3;
             }
             
             else
@@ -434,7 +481,7 @@ namespace SWE1_MTCG
             conEloWrite0.Open();
 
             string sqlEloWrite0 = $"UPDATE T_ELO SET elo = {player0Elo} " +
-                                  $"WHERE personid = {player0id}";
+                                  $"WHERE personid = {player0Id}";
 
             using var cmdEloWrite0 = new NpgsqlCommand(sqlEloWrite0, conEloWrite0);
             cmdEloWrite0.ExecuteNonQuery();
@@ -446,7 +493,7 @@ namespace SWE1_MTCG
             conEloWrite1.Open();
 
             string sqlEloWrite1 = $"UPDATE T_ELO SET elo = {player1Elo} " +
-                                  $"WHERE personid = {player1id}";
+                                  $"WHERE personid = {player1Id}";
 
             using var cmdEloWrite1 = new NpgsqlCommand(sqlEloWrite1, conEloWrite1);
             cmdEloWrite1.ExecuteNonQuery();

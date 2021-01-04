@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Sockets;
 
 namespace SWE1_MTCG.REST
 {
@@ -12,22 +13,26 @@ namespace SWE1_MTCG.REST
 
         public Battle BattleCenter = new Battle();
 
+        public TcpClient Client;
+
         // used while normal operation
         public WebHandler(ITcpHandler tcpHandler, Battle _battleCenter)
         {
             Console.WriteLine();
             BattleCenter = _battleCenter;
             _tcpHandler = tcpHandler;
-            _tcpHandler.AcceptTcpClient();
+            Client = _tcpHandler.AcceptTcpClient();
         }
 
         // for testing purposes
         public WebHandler(ITcpHandler tcpHandler, IRequestContext requestContext)
         {
             _tcpHandler = tcpHandler;
-            _tcpHandler.AcceptTcpClient();
-
             _requestContext = requestContext;
+        }
+        public WebHandler(ITcpHandler tcpHandler)
+        {
+            _tcpHandler = tcpHandler;
         }
 
         // reads message sent by client
@@ -36,12 +41,10 @@ namespace SWE1_MTCG.REST
         // I had to check, if the TcpClient has available data.
         public string GetHttpContent()
         {
-            //NetworkStream stream = _tcpHandler.GetStream();
-            //StreamReader reader = new StreamReader(stream);
-            var stream = _tcpHandler.GetStream();
+            var stream = _tcpHandler.GetStream(Client);
             var receivedData = "";
 
-            while (_tcpHandler.DataAvailable() != 0)
+            while (_tcpHandler.DataAvailable(Client) != 0)
             { 
                 Byte[] bytes = new Byte[4096];
                 int i = stream.Read(bytes, 0, bytes.Length);
@@ -64,14 +67,14 @@ namespace SWE1_MTCG.REST
 
             if (_requestContext.Payload != "")
             {
-                response += _requestContext.ContentType + "\r\n";
+                response +="Content-Type: " + _requestContext.ContentType + "\r\n";
 
                
                 var mlength = _requestContext.Payload.Length;
                 response += "Content-Length: " + mlength + "\r\n\r\n" + _requestContext.Payload;
                 
             }
-            using StreamWriter writer = new StreamWriter(_tcpHandler.GetStream()) { AutoFlush = true };
+            using StreamWriter writer = new StreamWriter(_tcpHandler.GetStream(Client)) { AutoFlush = true };
             writer.WriteLine(response);
             Console.WriteLine(response);
         }
