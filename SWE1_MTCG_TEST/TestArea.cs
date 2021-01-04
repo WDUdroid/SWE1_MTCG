@@ -257,23 +257,5 @@ namespace SWE1_MTCG_TEST
             Assert.AreEqual(0, battleCenter.Result.Count);
         }
 
-        [Test]
-        public void NewUserTest()
-        {
-            var battleCenter = new Battle();
-
-            battleCenter.Challengers.Add(new User(new List<CardInBattle>(), "player1"));
-            battleCenter.Challengers.Add(new User(new List<CardInBattle>(), "player2"));
-
-            Assert.AreEqual("TestData", battleCenter.CheckOnBattle());
-            Assert.AreEqual(1, battleCenter.Views);
-            Assert.AreEqual(3, battleCenter.Result.Count);
-
-
-            Assert.AreEqual("TestData", battleCenter.CheckOnBattle());
-            Assert.AreEqual(0, battleCenter.Views);
-            Assert.AreEqual(0, battleCenter.Result.Count);
-        }
-
     }
 }
