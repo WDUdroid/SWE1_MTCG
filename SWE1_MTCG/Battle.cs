@@ -1,230 +1,462 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
+using Npgsql;
+using SWE1_MTCG.HelperObjects;
 
 namespace SWE1_MTCG
 {
     public class Battle
     {
-        public List<User> Challengers { get; set; }
-
-        public List<string> NewBattle(User playerOne, User playerTwo)
+        public List<User> Challengers;
+        public List<string> Result;
+        public int Views;
+        static readonly string ConnectionString = "Host=localhost;Username=postgres;Password=postgres;Database=mtcg";
+        public void BattleFunc()
         {
-            if (playerOne == null) throw new ArgumentNullException(nameof(playerOne));
-            if (playerTwo == null) throw new ArgumentNullException(nameof(playerTwo));
+            Challengers = new List<User>();
+            Result = new List<string>();
 
-            var rand = new Random();
-
-            var playerOneFighters = new List<ICard>();
-            var playerTwoFighters = new List<ICard>();
-
-            var playerOneDuplicate = playerOne;
-            var playerTwoDuplicate = playerTwo;
-
-            for (int i = 0; i <= 4; i++)
+            while (true)
             {
-                int chooserOne = rand.Next(4 - i);
-                playerOneFighters.Add(playerOneDuplicate.UserDeck.CardsInDeck[chooserOne]);
-                playerOneDuplicate.UserDeck.CardsInDeck.RemoveAt(chooserOne);
-                int chooserTwo = rand.Next(4 - i);
-                playerTwoFighters.Add(playerTwoDuplicate.UserDeck.CardsInDeck[chooserTwo]);
-                playerTwoDuplicate.UserDeck.CardsInDeck.RemoveAt(chooserTwo);
-            }
-
-            var playerOneDeckPosition = 1;
-            var playerTwoDeckPosition = 1;
-            var attackingPlayer = 1;
-
-            var fightLog = new List<string>();
-
-            for (int i = 0; i <= 100; i++)
-            {
-                var playerOneBonus = 1;
-                var playerTwoBonus = 1;
-
-                if ((playerOneFighters[playerOneDeckPosition].MonsterType == EMonsterType.Spell) ^
-                    (playerTwoFighters[playerTwoDeckPosition].MonsterType == EMonsterType.Spell))
+                Thread.Sleep(100);
+                if (Challengers.Count == 2)
                 {
-                    if ((playerOneFighters[playerOneDeckPosition].Element == EElement.water) &&
-                        (playerTwoFighters[playerTwoDeckPosition].Element == EElement.fire))
-                    {
-                        playerOneBonus = 2;
-                    }
-                    else if ((playerOneFighters[playerOneDeckPosition].Element == EElement.fire) &&
-                        (playerTwoFighters[playerTwoDeckPosition].Element == EElement.water))
-                    {
-                        playerTwoBonus = 2;
-                    }
-                    else if ((playerOneFighters[playerOneDeckPosition].Element == EElement.fire) &&
-                             (playerTwoFighters[playerTwoDeckPosition].Element == EElement.normal))
-                    {
-                        playerOneBonus = 2;
-                    }
-                    else if ((playerOneFighters[playerOneDeckPosition].Element == EElement.normal) &&
-                             (playerTwoFighters[playerTwoDeckPosition].Element == EElement.fire))
-                    {
-                        playerTwoBonus = 2;
-                    }
-                    else if ((playerOneFighters[playerOneDeckPosition].Element == EElement.water) &&
-                             (playerTwoFighters[playerTwoDeckPosition].Element == EElement.normal))
-                    {
-                        playerOneBonus = 2;
-                    }
-                    else if ((playerOneFighters[playerOneDeckPosition].Element == EElement.normal) &&
-                             (playerTwoFighters[playerTwoDeckPosition].Element == EElement.water))
-                    {
-                        playerTwoBonus = 2;
-                    }
-                    else
-                    {
-                        throw new ArgumentException("Fighter Element not clear.");
-                    }
-                }
-
-                if ((playerOneFighters[playerOneDeckPosition].MonsterType == EMonsterType.Goblin) &&
-                    (playerTwoFighters[playerTwoDeckPosition].MonsterType == EMonsterType.Dragon))
-                {
-                    playerOneBonus = 0;
-                }
-                else if ((playerOneFighters[playerOneDeckPosition].MonsterType == EMonsterType.Dragon) &&
-                    (playerTwoFighters[playerTwoDeckPosition].MonsterType == EMonsterType.Goblin))
-                {
-                    playerTwoBonus = 0;
-                }
-                else if ((playerOneFighters[playerOneDeckPosition].MonsterType == EMonsterType.Ork) &&
-                         (playerTwoFighters[playerTwoDeckPosition].MonsterType == EMonsterType.Wizard))
-                {
-                    playerOneBonus = 0;
-                }
-                else if ((playerOneFighters[playerOneDeckPosition].MonsterType == EMonsterType.Wizard) &&
-                         (playerTwoFighters[playerTwoDeckPosition].MonsterType == EMonsterType.Ork))
-                {
-                    playerTwoBonus = 0;
-                }
-                else if ((playerOneFighters[playerOneDeckPosition].MonsterType == EMonsterType.Knight) &&
-                         (playerTwoFighters[playerTwoDeckPosition].Element == EElement.water))
-                {
-                    playerOneBonus = 0;
-                }
-                else if ((playerTwoFighters[playerTwoDeckPosition].MonsterType == EMonsterType.Knight) &&
-                         (playerOneFighters[playerOneDeckPosition].Element == EElement.water))
-                {
-                    playerTwoBonus = 0;
-                }
-                else if ((playerOneFighters[playerOneDeckPosition].MonsterType == EMonsterType.Spell) &&
-                         (playerTwoFighters[playerTwoDeckPosition].MonsterType == EMonsterType.Kraken))
-                {
-                    playerOneBonus = 0;
-                }
-                else if ((playerOneFighters[playerOneDeckPosition].MonsterType == EMonsterType.Kraken) &&
-                         (playerTwoFighters[playerTwoDeckPosition].MonsterType == EMonsterType.Spell))
-                {
-                    playerTwoBonus = 0;
-                }
-                else if ((playerOneFighters[playerOneDeckPosition].MonsterType == EMonsterType.Dragon) &&
-                         (playerTwoFighters[playerTwoDeckPosition].MonsterType == EMonsterType.FireElve))
-                {
-                    playerOneBonus = 0;
-                }
-                else if ((playerOneFighters[playerOneDeckPosition].MonsterType == EMonsterType.FireElve) &&
-                         (playerTwoFighters[playerTwoDeckPosition].MonsterType == EMonsterType.Dragon))
-                {
-                    playerTwoBonus = 0;
-                }
-
-                if (playerOneFighters[playerOneDeckPosition].Damage * playerOneBonus >
-                    playerTwoFighters[playerTwoDeckPosition].Damage * playerTwoBonus)
-                {
-                    playerOneFighters.Add(playerTwoFighters[playerTwoDeckPosition]);
-                    playerTwoFighters.RemoveAt(playerTwoDeckPosition);
-
-                    if (attackingPlayer == 1)
-                    {
-                        fightLog.Add("Player 1 attacked with " +
-                                     playerOneFighters[playerOneDeckPosition].Name + " and bested Player 2s " +
-                                     playerTwoFighters[playerTwoDeckPosition].Name);
-                    }
-                    else
-                    {
-                        fightLog.Add("Player 2 attacked with " +
-                                     playerTwoFighters[playerTwoDeckPosition].Name + " and was defeated by Player 1s " +
-                                     playerOneFighters[playerOneDeckPosition].Name);
-                    }
-
-                    if (playerTwoFighters.Count == 0) break;
-                    attackingPlayer = attackingPlayer % 2 + 1;
-                }
-                
-                else if ((playerOneFighters[playerOneDeckPosition].Damage * playerOneBonus ==
-                          playerTwoFighters[playerTwoDeckPosition].Damage * playerTwoBonus) && attackingPlayer == 1)
-                {
-                    playerTwoFighters.Add(playerOneFighters[playerOneDeckPosition]);
-                    playerOneFighters.RemoveAt(playerOneDeckPosition);
-
-                    fightLog.Add("Player 1 attacked with " +
-                                 playerOneFighters[playerOneDeckPosition].Name + " and bested Player 2s " +
-                                 playerTwoFighters[playerTwoDeckPosition].Name);
-
-                    if (playerOneFighters.Count == 0) break;
-                    attackingPlayer = attackingPlayer % 2 + 1;
-                }
-                
-                else if ((playerOneFighters[playerOneDeckPosition].Damage * playerOneBonus ==
-                          playerTwoFighters[playerTwoDeckPosition].Damage * playerTwoBonus) && attackingPlayer == 2)
-                {
-                    playerTwoFighters.Add(playerOneFighters[playerOneDeckPosition]);
-                    playerOneFighters.RemoveAt(playerOneDeckPosition);
-
-                    fightLog.Add("Player 2 attacked with " +
-                                 playerTwoFighters[playerTwoDeckPosition].Name + " and bested Player 1s " +
-                                 playerOneFighters[playerOneDeckPosition].Name);
-
-                    if (playerTwoFighters.Count == 0) break;
-                    attackingPlayer = attackingPlayer % 2 + 1;
-                }
-                
-                else if (playerOneFighters[playerOneDeckPosition].Damage * playerOneBonus <
-                         playerTwoFighters[playerTwoDeckPosition].Damage * playerTwoBonus)
-                {
-                    playerTwoFighters.Add(playerOneFighters[playerOneDeckPosition]);
-                    playerOneFighters.RemoveAt(playerOneDeckPosition);
-
-                    if (attackingPlayer == 1)
-                    {
-                        fightLog.Add("Player 1 attacked with " +
-                                     playerOneFighters[playerOneDeckPosition].Name + " and was defeated by Player 2s " +
-                                     playerTwoFighters[playerTwoDeckPosition].Name);
-                    }
-                    else
-                    {
-                        fightLog.Add("Player 2 attacked with " +
-                                     playerTwoFighters[playerTwoDeckPosition].Name + " and bested Player 1s " +
-                                     playerOneFighters[playerOneDeckPosition].Name);
-                    }
-
-                    if (playerOneFighters.Count == 0) break;
-                    attackingPlayer = attackingPlayer % 2 + 1;
-                }
-                
-                else
-                {
-                    throw new ArgumentException("Fighter Damage not clear.");
+                    Fight();
                 }
             }
+        }
 
-            if (playerOneFighters.Count != 0 && playerTwoFighters.Count != 0)
+        public int RegForBattle(string token)
+        {
+            if (Challengers.Count > 1)
             {
-                fightLog.Add("Player 1 and Player 2 tied");
-            }
-            else if (playerOneFighters.Count != 0 && playerTwoFighters.Count == 0)
-            {
-                fightLog.Add("Player 1 won");
-            }
-            else if (playerOneFighters.Count == 0 && playerTwoFighters.Count != 0)
-            {
-                fightLog.Add("Player 2 won");
+                return -100;
             }
 
-            return fightLog;
+            var cardList = new List<CardInBattle>();
+
+            using var conFetchDeck = new NpgsqlConnection(ConnectionString);
+            conFetchDeck.Open();
+
+            string sqlFetchDeck = $"SELECT * FROM STACK INNER JOIN DECK ON STACK.cardid = DECK.cardid " +
+                                  $"INNER JOIN CARDS ON STACK.name = CARDS.name " +
+                                  $"INNER JOIN CREDENTIALS ON STACK.personID = CREDENTIALS.ID " +
+                                  $"WHERE CREDENTIALS.token = '{token}'";
+
+            using var cmdFetchDeck = new NpgsqlCommand(sqlFetchDeck, conFetchDeck);
+
+            using var fetchReader = cmdFetchDeck.ExecuteReader();
+
+            while (fetchReader.Read())
+            {
+                string name = fetchReader.GetString(fetchReader.GetOrdinal("name"));
+                string type = fetchReader.GetString(fetchReader.GetOrdinal("type"));
+                string element = fetchReader.GetString(fetchReader.GetOrdinal("element"));
+                int damage = fetchReader.GetInt32(fetchReader.GetOrdinal("damage"));
+                var tmpObject = new CardInBattle(name, type, element, damage);
+                cardList.Add(tmpObject);
+            }
+
+            if (cardList.Count != 4)
+            {
+                Console.WriteLine(cardList.Count);
+                return -101;
+            }
+
+            var newChallenger = new User(cardList, token);
+            Challengers.Add(newChallenger);
+
+            return 0;
+        }
+
+        public string CheckOnBattle()
+        {
+            while (true)
+            {
+                Thread.Sleep(10);
+                if (Result.Count > 0)
+                {
+                    var resultBite = Result[0];
+                    Views++;
+                    if (Views == 2)
+                    {
+                        Result.Clear();
+                    }
+                    return resultBite;
+                }
+            }
+        }
+
+        public void Fight()
+        {
+            Random randomPlayer0 = new Random();
+            Random randomPlayer1 = new Random();
+
+            int chosenCardPlayer0 = 0;
+            int chosenCardPlayer1 = 0;
+
+            var rounds = 1;
+            string battleLog = "";
+
+            while ((rounds < 100) && (Challengers[0].ChallengerDeck.Count != 0) && (Challengers[0].ChallengerDeck.Count != 8))
+            {
+                rounds++;
+
+                double player0x = 1;
+                double player1x = 1;
+
+                chosenCardPlayer0 = randomPlayer0.Next(0, Challengers[0].ChallengerDeck.Count - 1);
+                chosenCardPlayer1 = randomPlayer1.Next(0, Challengers[1].ChallengerDeck.Count - 1);
+
+                var player0Card = Challengers[0].ChallengerDeck[chosenCardPlayer0];
+                var player1Card = Challengers[1].ChallengerDeck[chosenCardPlayer1];
+
+                // Monster vs Monster
+                if ((player0Card.Type == "Monster") && (player1Card.Type == "Monster"))
+                {
+                    // Goblin against Droagon
+                    if ((player0Card.Name.Contains("Goblin")) && (player1Card.Name.Contains("Dragon")))
+                    {
+                        player0x = 0;
+                    }
+                    if ((player1Card.Name.Contains("Goblin")) && (player0Card.Name.Contains("Dragon")))
+                    {
+                        player1x = 0;
+                    }
+
+                    //Wizzard against Ork
+                    if ((player0Card.Name.Contains("Ork")) && (player1Card.Name.Contains("Wizzard")))
+                    {
+                        player0x = 0;
+                    }
+                    if ((player1Card.Name.Contains("Ork")) && (player0Card.Name.Contains("Wizzard")))
+                    {
+                        player1x = 0;
+                    }
+
+                    //FireElf against Dragon
+                    if ((player0Card.Name.Contains("FireElf")) && (player1Card.Name.Contains("Dragon")))
+                    {
+                        player1x = 0;
+                    }
+                    if ((player1Card.Name.Contains("FireElf")) && (player0Card.Name.Contains("Dragon")))
+                    {
+                        player0x = 0;
+                    }
+                }
+
+                //Monster vs Spell
+                if ((player0Card.Type == "Spell") && (player1Card.Type == "Monster"))
+                {
+                    // Water Spell against Fire Monster
+                    if ((player0Card.Element == "Water") && (player1Card.Element == "Fire"))
+                    {
+                        player0x = 2;
+                    }
+
+                    // Fire Spell against Normal Monster
+                    if ((player0Card.Element == "Fire") && (player1Card.Element == "Normal"))
+                    {
+                        player0x = 2;
+                    }
+
+                    // Normal Spell against Water Monster
+                    if ((player0Card.Element == "Normal") && (player1Card.Element == "Water"))
+                    {
+                        player0x = 2;
+                    }
+
+                    // Fire Spell against Water Monster
+                    if ((player0Card.Element == "Fire") && (player1Card.Element == "Water"))
+                    {
+                        player0x = 0.5;
+                    }
+
+                    // Normal Spell against Fire Monster
+                    if ((player0Card.Element == "Normal") && (player1Card.Element == "Fire"))
+                    {
+                        player0x = 0.5;
+                    }
+
+                    // Water Spell against Normal Monster
+                    if ((player0Card.Element == "Water") && (player1Card.Element == "Normal"))
+                    {
+                        player0x = 0.5;
+                    }
+
+                    // Water Spell against Knight
+                    if ((player0Card.Element == "Water") && (player1Card.Name.Contains("Knight")))
+                    {
+                        player1x = 0;
+                    }
+
+                    // Spell against Kraken
+                    if (player1Card.Name.Contains("Kraken"))
+                    {
+                        player0x = 0;
+                    }
+                }
+
+                if ((player1Card.Type == "Spell") && (player0Card.Type == "Monster"))
+                {
+                    // Water Spell against Fire Monster
+                    if ((player1Card.Element == "Water") && (player0Card.Element == "Fire"))
+                    {
+                        player1x = 2;
+                    }
+
+                    // Fire Spell against Normal Monster
+                    if ((player1Card.Element == "Fire") && (player0Card.Element == "Normal"))
+                    {
+                        player1x = 2;
+                    }
+
+                    // Normal Spell against Water Monster
+                    if ((player1Card.Element == "Normal") && (player0Card.Element == "Water"))
+                    {
+                        player1x = 2;
+                    }
+
+                    // Fire Spell against Water Monster
+                    if ((player1Card.Element == "Fire") && (player0Card.Element == "Water"))
+                    {
+                        player1x = 0.5;
+                    }
+
+                    // Normal Spell against Fire Monster
+                    if ((player1Card.Element == "Normal") && (player0Card.Element == "Fire"))
+                    {
+                        player1x = 0.5;
+                    }
+
+                    // Water Spell against Normal Monster
+                    if ((player1Card.Element == "Water") && (player0Card.Element == "Normal"))
+                    {
+                        player1x = 0.5;
+                    }
+
+                    // Water Spell against Knight
+                    if ((player1Card.Element == "Water") && (player0Card.Name.Contains("Knight")))
+                    {
+                        player0x = 0;
+                    }
+
+                    // Spell against Kraken
+                    if (player0Card.Name.Contains("Kraken"))
+                    {
+                        player1x = 0;
+                    }
+                }
+
+                if ((player0Card.Type == "Spell") && (player1Card.Type == "Spell"))
+                {
+                    // Water Spell against Fire Spell
+                    if ((player0Card.Element == "Water") && (player1Card.Element == "Fire"))
+                    {
+                        player0x = 2;
+                    }
+
+                    // Fire Spell against Normal Spell
+                    if ((player0Card.Element == "Fire") && (player1Card.Element == "Normal"))
+                    {
+                        player0x = 2;
+                    }
+
+                    // Normal Spell against Water Spell
+                    if ((player0Card.Element == "Normal") && (player1Card.Element == "Water"))
+                    {
+                        player0x = 2;
+                    }
+
+                    // Fire Spell against Water Spell
+                    if ((player0Card.Element == "Fire") && (player1Card.Element == "Water"))
+                    {
+                        player0x = 0.5;
+                    }
+
+                    // Normal Spell against Fire Spell
+                    if ((player0Card.Element == "Normal") && (player1Card.Element == "Fire"))
+                    {
+                        player0x = 0.5;
+                    }
+
+                    // Water Spell against Normal Spell
+                    if ((player0Card.Element == "Water") && (player1Card.Element == "Normal"))
+                    {
+                        player0x = 0.5;
+                    }
+
+                    // Water Spell against Fire Spell
+                    if ((player1Card.Element == "Water") && (player0Card.Element == "Fire"))
+                    {
+                        player1x = 2;
+                    }
+
+                    // Fire Spell against Normal Spell
+                    if ((player1Card.Element == "Fire") && (player0Card.Element == "Normal"))
+                    {
+                        player1x = 2;
+                    }
+
+                    // Normal Spell against Water Spell
+                    if ((player1Card.Element == "Normal") && (player0Card.Element == "Water"))
+                    {
+                        player1x = 2;
+                    }
+
+                    // Fire Spell against Water Spell
+                    if ((player1Card.Element == "Fire") && (player0Card.Element == "Water"))
+                    {
+                        player1x = 0.5;
+                    }
+
+                    // Normal Spell against Fire Spell
+                    if ((player1Card.Element == "Normal") && (player0Card.Element == "Fire"))
+                    {
+                        player1x = 0.5;
+                    }
+
+                    // Water Spell against Normal Spell
+                    if ((player1Card.Element == "Water") && (player0Card.Element == "Normal"))
+                    {
+                        player1x = 0.5;
+                    }
+                }
+
+                var roundString = $"{player0Card.Name} with a Dmg-Level of (Dmg * multi) {player0Card.Damage * player0x} " +
+                                  $"fought against the almighty {player1Card.Name}, Dmg-Level (Dmg * multi) {player1Card.Damage * player1x} and ";
+
+                if (player0Card.Damage * player0x > player1Card.Damage * player1x)
+                {
+                    roundString += "won this round!\r\n";
+                    Challengers[1].ChallengerDeck.RemoveAt(chosenCardPlayer1);
+                    Challengers[0].ChallengerDeck.Add(player1Card);
+                }
+
+                if (player1Card.Damage * player1x > player0Card.Damage * player0x)
+                {
+                    roundString += "lost this round!\r\n";
+                    Challengers[0].ChallengerDeck.RemoveAt(chosenCardPlayer0);
+                    Challengers[1].ChallengerDeck.Add(player1Card);
+                }
+
+                if (player0Card.Damage * player0x == player1Card.Damage * player1x)
+                {
+                    roundString += "it was a draw... :(\r\n";
+                }
+
+                battleLog += roundString;
+            }
+
+            using var conFetchPlayer0Username = new NpgsqlConnection(ConnectionString);
+            conFetchPlayer0Username.Open();
+
+            string sqlFetchPlayer0Username = $"SELECT username FROM CREDENTIALS WHERE token = '{Challengers[0].Token}'";
+            using var cmdFetchPlayer0Username = new NpgsqlCommand(sqlFetchPlayer0Username, conFetchPlayer0Username);
+            using var fetchPlayer0UsernameReader = cmdFetchPlayer0Username.ExecuteReader();
+
+            fetchPlayer0UsernameReader.Read();
+            string player0Username = fetchPlayer0UsernameReader.GetString(fetchPlayer0UsernameReader.GetOrdinal("username"));
+
+            conFetchPlayer0Username.Close();
+
+
+            using var conFetchPlayer1Username = new NpgsqlConnection(ConnectionString);
+            conFetchPlayer1Username.Open();
+
+            string sqlFetchPlayer1Username = $"SELECT username FROM CREDENTIALS WHERE token = '{Challengers[1].Token}'";
+            using var cmdFetchPlayer1Username = new NpgsqlCommand(sqlFetchPlayer1Username, conFetchPlayer1Username);
+            using var fetchPlayer1UsernameReader = cmdFetchPlayer1Username.ExecuteReader();
+
+            fetchPlayer1UsernameReader.Read();
+            string player1Username = fetchPlayer1UsernameReader.GetString(fetchPlayer1UsernameReader.GetOrdinal("username"));
+
+            conFetchPlayer1Username.Close();
+
+
+            using var conEloRead1 = new NpgsqlConnection(ConnectionString);
+            conEloRead1.Open();
+
+            string sqlEloRead1 = $"SELECT elo, id FROM CREDENTIALS INNER JOIN T_ELO " +
+                                 $"ON CREDENTIALS.ID = T_ELO.personID " +
+                                 $"WHERE token = '{Challengers[1].Token}'";
+
+            using var cmdEloRead1 = new NpgsqlCommand(sqlEloRead1, conEloRead1);
+            using var eloRead1Reader = cmdEloRead1.ExecuteReader();
+
+            eloRead1Reader.Read();
+            int player1Elo = eloRead1Reader.GetInt32(eloRead1Reader.GetOrdinal("elo"));
+            int player1id = eloRead1Reader.GetInt32(eloRead1Reader.GetOrdinal("id"));
+
+            conEloRead1.Close();
+
+
+            using var conEloRead0 = new NpgsqlConnection(ConnectionString);
+            conEloRead0.Open();
+
+            string sqlEloRead0 = $"SELECT elo, id FROM CREDENTIALS INNER JOIN T_ELO " +
+                                 $"ON CREDENTIALS.ID = T_ELO.personID " +
+                                 $"WHERE token = '{Challengers[0].Token}'";
+
+            using var cmdEloRead0 = new NpgsqlCommand(sqlEloRead0, conEloRead0);
+            using var eloRead0Reader = cmdEloRead0.ExecuteReader();
+
+            eloRead0Reader.Read();
+            int player0Elo = eloRead0Reader.GetInt32(eloRead0Reader.GetOrdinal("elo"));
+            int player0id = eloRead0Reader.GetInt32(eloRead0Reader.GetOrdinal("id"));
+
+            conEloRead0.Close();
+
+            if (Challengers[0].ChallengerDeck.Count == 0)
+            {
+                battleLog += $"{player0Username} lost / {player1Username} won with {rounds} rounds played\r\n";
+                player0Elo = player0Elo + 3;
+                player1Elo = player1Elo - 5;
+            }
+
+            if (Challengers[0].ChallengerDeck.Count == 8)
+            {
+                battleLog += $"{player0Username} won / {player1Username} lost with {rounds} rounds played\r\n";
+                player1Elo = player1Elo + 3;
+                player0Elo = player0Elo - 5;
+            }
+            
+            else
+            {
+                battleLog += $"Draw between {player0Username} and {player1Username} with {rounds} rounds played\r\n";
+            }
+
+            battleLog += $"{player0Username} Elo {player0Elo} / {player1Username} Elo {player1Elo}\r\n";
+
+
+            using var conEloWrite0 = new NpgsqlConnection(ConnectionString);
+            conEloWrite0.Open();
+
+            string sqlEloWrite0 = $"UPDATE T_ELO SET elo = {player0Elo} " +
+                                  $"WHERE personid = {player0id}";
+
+            using var cmdEloWrite0 = new NpgsqlCommand(sqlEloWrite0, conEloWrite0);
+            cmdEloWrite0.ExecuteNonQuery();
+
+            conEloWrite0.Close();
+
+
+            using var conEloWrite1 = new NpgsqlConnection(ConnectionString);
+            conEloWrite1.Open();
+
+            string sqlEloWrite1 = $"UPDATE T_ELO SET elo = {player1Elo} " +
+                                  $"WHERE personid = {player1id}";
+
+            using var cmdEloWrite1 = new NpgsqlCommand(sqlEloWrite1, conEloWrite1);
+            cmdEloWrite1.ExecuteNonQuery();
+
+            conEloWrite1.Close();
+
+            Result.Add(battleLog);
+            Result.Add(battleLog);
+
+            Challengers.Clear();
         }
     }
 }
