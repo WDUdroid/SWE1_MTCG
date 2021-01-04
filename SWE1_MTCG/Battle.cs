@@ -12,11 +12,14 @@ namespace SWE1_MTCG
         public List<string> Result;
         public int Views;
         static readonly string ConnectionString = "Host=localhost;Username=postgres;Password=postgres;Database=mtcg";
-        public void BattleFunc()
+
+        public Battle()
         {
             Challengers = new List<User>();
             Result = new List<string>();
-
+        }
+        public void BattleFunc()
+        {
             while (true)
             {
                 Thread.Sleep(100);

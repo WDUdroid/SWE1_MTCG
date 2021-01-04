@@ -989,6 +989,27 @@ namespace SWE1_MTCG.DBHandler
 
             return "0";
         }
+
+        public static int PingDataBase()
+        {
+            try
+            {
+                using var con = new NpgsqlConnection(ConnectionString);
+                con.Open();
+
+                string sql = $"SELECT COUNT(*) FROM CARDS";
+                using var cmd = new NpgsqlCommand(sql, con);
+
+                cmd.ExecuteScalar();
+                con.Close();
+                return 0;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return -1;
+            }
+        }
         //public static int NewCard(string name, string type, string element)
         //{
         //    using var con = new NpgsqlConnection(ConnectionString);

@@ -13,7 +13,7 @@ namespace SWE1_MTCG.REST
         public TcpHandler()
         {
             // Connect server
-            _server = new System.Net.Sockets.TcpListener(IPAddress.Loopback, 10001);
+            _server = new TcpListener(IPAddress.Loopback, 10001);
             _server.Start(5);
         }
 

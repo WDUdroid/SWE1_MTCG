@@ -22,6 +22,8 @@ namespace SWE1_MTCG
 
         static Task Main(string[] args)
         {
+            BattleCenter = new Battle();
+
             ConsoleOutputs.WelcomeMessage();
             Console.WriteLine("__________STARTING REST-SERVER__________");
 

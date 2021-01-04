@@ -21,7 +21,7 @@ namespace SWE1_MTCG.REST
         public Battle BattleCenter = new Battle();
 
         // for testing purposes
-        public RequestContext(string receivedData)
+        public RequestContext()
         {
         }
 
@@ -72,6 +72,12 @@ namespace SWE1_MTCG.REST
         // Checks which function is appropriate for specific HttpRequest
         public void RequestCoordinator()
         {
+            if (DatabaseHandler.PingDataBase() == -1)
+            {
+                ServerError();
+                return;
+            }
+
             dynamic data = HeaderInfo;
 
             if (HeaderInfo.ContainsKey("RequestPath") == false)
@@ -880,6 +886,14 @@ namespace SWE1_MTCG.REST
             ContentType = "text/plain";
             Payload = "Bad Request";
             Console.WriteLine(">>Responding with 400 Bad Request");
+        }
+
+        private void ServerError()
+        {
+            StatusCode = "500 Internal Server Error";
+            ContentType = "text/plain";
+            Payload = "500 Internal Server Error";
+            Console.WriteLine(">>Responding with 500 Internal Server Error");
         }
     }
 }
