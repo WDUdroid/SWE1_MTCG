@@ -7,6 +7,8 @@ using System.Threading;
 using NUnit.Framework;
 using SWE1_MTCG;
 using Moq;
+using Npgsql;
+using SWE1_MTCG.DBHandler;
 using SWE1_MTCG.HelperObjects;
 using SWE1_MTCG.REST;
 
@@ -255,6 +257,30 @@ namespace SWE1_MTCG_TEST
             Assert.AreEqual("TestData", battleCenter.CheckOnBattle());
             Assert.AreEqual(0, battleCenter.Views);
             Assert.AreEqual(0, battleCenter.Result.Count);
+        }
+
+        [Test]
+        public void ConnectionToDbTest()
+        {
+            int connected;
+            try
+            {
+                using var con = new NpgsqlConnection("Host=localhost;Username=postgres;Password=postgres;Database=mtcg");
+                con.Open();
+
+                string sql = $"SELECT COUNT(*) FROM CARDS";
+                using var cmd = new NpgsqlCommand(sql, con);
+
+                cmd.ExecuteScalar();
+                con.Close();
+                connected = 0;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                connected = -1;
+            }
+            Assert.AreEqual(connected, DatabaseHandler.PingDataBase());
         }
 
     }

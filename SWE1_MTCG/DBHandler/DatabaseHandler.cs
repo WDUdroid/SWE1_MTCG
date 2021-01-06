@@ -6,7 +6,7 @@ using SWE1_MTCG.HelperObjects;
 
 namespace SWE1_MTCG.DBHandler
 {
-    class DatabaseHandler
+    public class DatabaseHandler
     {
         static readonly string ConnectionString = "Host=localhost;Username=postgres;Password=postgres;Database=mtcg";
 
